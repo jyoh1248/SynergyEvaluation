@@ -1,0 +1,644 @@
+---
+title: "Simulation non constant"
+author: "Jiyoung"
+date: "06/10/2020"
+output:
+  word_document: default
+  pdf_document: default
+  html_document: default
+---
+
+```{r, results="hide", echo=FALSE, message=FALSE}
+#install.packages("dplyr")
+#install.packages("data.table")
+#install.packages("ggplot2")
+#install.packages("openxlsx")
+#install.packages("/drc2_0.1.0.tar.gz", repos = NULL, type = "source")
+#install.packages("/SynergyEvaluation_1.0.5.2020.tar.gz", repos = NULL, type = "source")
+library(SynergyEvaluation)
+library(parallel)
+library(doParallel)
+library(foreach)
+library.list <-c("drc2","dplyr","ggplot2","data.table","gridExtra","grid","openxlsx")
+sapply(library.list, require, character.only = T, quietly = T)
+set.seed(100)
+```
+```{r}
+# detect the number of cores
+n.cores <- detectCores()
+n.cores
+n.cl = n.cores/2-1
+```
+
+# Data Simulation
+
+### 1. Define Parameters
+```{r, echo=TRUE}
+Nexperiment = 10
+sd=4
+ICvalue = 50
+lambda=c(0.5,1/3,2/3)
+paramA<-ParameterData(Emax = 80,
+                  Emin = 0, 
+                  IC50 = 100,
+                  m =1)
+paramB<-ParameterData(Emax = 100,
+                  Emin = 0, 
+                  IC50 = 200,
+                  m =1)
+paramTheoretical<-data.frame(EminA = paramA$Emin,
+                             EmaxA = paramA$Emax,
+                             mA = paramA$m,
+                             IC50relA = log(paramA$IC50rel),
+                             EminB = paramB$Emin,
+                             EmaxB = paramB$Emax,
+                             mB = paramB$m,
+                             IC50relB = log(paramB$IC50rel))
+```
+
+### 2-1. Rays with additive combinations
+```{r,echo=TRUE}
+paramC1<-ParameterData(Emax = 100,
+                  Emin = 0, 
+                  IC50 = 400/3,
+                  m =1)
+paramC2<-ParameterData(Emax = 100,
+                  Emin = 0, 
+                  IC50 = 150,
+                  m =1)
+paramC3<-ParameterData(Emax = 100,
+                  Emin = 0, 
+                  IC50 = 120,
+                  m =1)
+Data_Add = SimulateExperiment(Nexperiment,paramA, paramB, 
+                           paramC1,paramC2,paramC3, 
+                           lambda1=0.5, lambda2=1/3, lambda3=2/3, 
+                           rayA=1, rayB=5, ray1=2, ray2=3, ray3=4,Rep=3, sd)
+```
+
+### 2-2.Rays with synergic combinations : K = 0.5
+```{r,echo=TRUE}
+paramC1s1<-ParameterData(Emax = 100,
+                  Emin = 0, 
+                  IC50 = 200/3,
+                  m =1)
+paramC2s1<-ParameterData(Emax = 100,
+                  Emin = 0, 
+                  IC50 = 75,
+                  m =1)
+paramC3s1<-ParameterData(Emax = 100,
+                  Emin = 0, 
+                  IC50 = 60,
+                  m =1)
+Data_Syn1 = SimulateExperiment(Nexperiment,paramA, paramB, 
+                           paramC1s1,paramC2s1,paramC3s1, 
+                           lambda1=0.5, lambda2=1/3, lambda3=2/3, 
+                           rayA=1, rayB=5, ray1=2, ray2=3, ray3=4,Rep=3, sd)
+```
+
+### 2-3. #Rays with synergic combinations : K = 0.8
+```{r,echo=TRUE}
+paramC1s2<-ParameterData(Emax = 100,
+                  Emin = 0, 
+                  IC50 = 320/3,
+                  m =1)
+paramC2s2<-ParameterData(Emax = 100,
+                  Emin = 0, 
+                  IC50 = 120,
+                  m =1)
+paramC3s2<-ParameterData(Emax = 100,
+                  Emin = 0, 
+                  IC50 = 96,
+                  m =1)
+Data_Syn2 = SimulateExperiment(Nexperiment,paramA, paramB, 
+                           paramC1s2,paramC2s2,paramC3s2, 
+                           lambda1=0.5, lambda2=1/3, lambda3=2/3, 
+                           rayA=1, rayB=5, ray1=2, ray2=3, ray3=4,Rep=3, sd)
+```
+#Estimate parameter
+```{r,echo=FALSE}
+param1 = EstimatePE(Data_Add, "doseA", "doseB",Nexperiment,5)
+param2 = EstimatePE(Data_Syn1, "doseA", "doseB",Nexperiment,5)
+param3 = EstimatePE(Data_Syn2, "doseA", "doseB",Nexperiment,5)
+
+paramA1 = param1 %>% filter(Ray==1)
+paramB1 = param1 %>% filter(Ray==5)
+paramTh1 = ExtractParameters(paramA1, paramB1)
+
+paramA2 = param2 %>% filter(Ray==1)
+paramB2 = param2 %>% filter(Ray==5)
+paramTh2 = ExtractParameters(paramA2, paramB2)
+
+paramA3 = param3 %>% filter(Ray==1)
+paramB3 = param3 %>% filter(Ray==5)
+paramTh3 = ExtractParameters(paramA3, paramB3)
+```
+
+# Additive Isobole by taking theoretical parameters of monotherapy 
+
+
+### 1. Loewe model
+```{r,echo=FALSE}
+loewe = Loewemodel(ICvalue, paramTheoretical, lambda,1)
+cl<-makeCluster(n.cl)
+clusterEvalQ(cl, {library(dplyr);library(SynergyEvaluation)})
+registerDoParallel(cl)
+
+#Data_Add
+loewe1 = foreach (i=1:Nexperiment) %dopar% {
+  paramTh0 = paramTh1 %>% dplyr::filter(ExpA==i)
+  l = Loewemodel(ICvalue, paramTh0, lambda,1)
+  data.frame(l,Experiment=i)
+}
+loewe11 = do.call(rbind,loewe1)
+
+#Data_Syn1
+loewe2 = foreach (i=1:Nexperiment) %dopar% {
+  paramTh0 = paramTh2 %>% dplyr::filter(ExpA==i)
+  l = Loewemodel(ICvalue, paramTh0, lambda,0.5)
+  data.frame(l,Experiment=i)
+}
+loewe21 = do.call(rbind,loewe2)
+
+#Data_Syn2
+loewe3 = foreach (i=1:Nexperiment) %dopar% {
+  paramTh0 = paramTh3 %>% dplyr::filter(ExpA==i)
+  l = Loewemodel(ICvalue, paramTh0, lambda,0.8)
+  data.frame(l,Experiment=i)
+}
+loewe31 = do.call(rbind,loewe3)
+
+stopCluster(cl)
+```
+
+### 2. Tallarida model
+#Parameter
+```{r,echo=FALSE}
+param1T = EstimateParametersTallarida(Data_Add, "doseA", "doseB",Nexperiment,5)
+param2T = EstimateParametersTallarida(Data_Syn1, "doseA", "doseB",Nexperiment,5)
+param3T = EstimateParametersTallarida(Data_Syn2, "doseA", "doseB",Nexperiment,5)
+```
+
+```{r,echo=FALSE}
+tallarida = Tallaridamodel_Twoline(paramTheoretical, "doseA", "doseB", ICvalue)
+cl<-makeCluster(n.cl)
+clusterEvalQ(cl, {library(dplyr);library(SynergyEvaluation)})
+registerDoParallel(cl)
+
+#Data_Add
+tall1 = foreach (i=1:Nexperiment) %dopar% {
+  paramTh0 = param1T  %>% dplyr::filter(Experiment==i)
+  t = Tallaridamodel_Twoline(paramTh0, "doseA", "doseB", ICvalue)
+  data.frame(t,Experiment=i)
+}
+tall11 = do.call(rbind,tall1)
+
+#Data_Syn1
+tall2 = foreach (i=1:Nexperiment) %dopar% {
+  paramTh0 = param2T %>% dplyr::filter(Experiment==i)
+  t = Tallaridamodel_Twoline(paramTh0, "doseA", "doseB", ICvalue)
+  data.frame(t,Experiment=i)
+}
+tall21 = do.call(rbind,tall2)
+
+#Data_Syn2
+tall3 = foreach (i=1:Nexperiment) %dopar% {
+  paramTh0 = param3T %>% dplyr::filter(Experiment==i)
+  t = Tallaridamodel_Twoline(paramTh0, "doseA", "doseB", ICvalue)
+  data.frame(t,Experiment=i)
+}
+tall31 = do.call(rbind,tall3)
+
+stopCluster(cl)
+```
+
+### 3. Handmodel
+```{r,echo=FALSE, error=FALSE, message=FALSE}
+lambdaH = c(0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9)
+handH = Handmodel(p = paramTheoretical, l = lambdaH, doseeffect = "F", effectsens="F", returndata ="F")
+handT = HandData(handH, paramTheoretical, ICvalue)
+handTh = handT %>%select(doseA, doseB, I) 
+print(handT)
+
+
+handP1 = Handmodel(p = paramTheoretical, l = lambda, doseeffect = "F", effectsens="F", returndata ="F")
+handP = HandData(handP1, paramTheoretical, ICvalue)
+handP2 = handP %>% filter((doseA>0)&(doseB>0))%>%select(doseA, doseB, I, lambda) 
+print(handP)
+print(handP2)
+```
+
+
+```{r,echo=FALSE, error=FALSE, message=FALSE}
+cl<-makeCluster(n.cl)
+clusterEvalQ(cl, {library(dplyr);library(ggplot2);library(SynergyEvaluation);library(drc2)})
+registerDoParallel(cl)
+
+#Data_Add
+hand1 = foreach (i=1:Nexperiment) %dopar% {
+  paramTh0 = paramTh1 %>% dplyr::filter(ExpA==i)
+  handmod = Handmodel(p=paramTh0, l=lambda)
+  p = HandData(handmod, paramTh0, ICvalue)
+  data.frame(p,Experiment=i)
+}
+hand11 = do.call(rbind,hand1)
+
+#Data_Syn1
+hand2 = foreach (i=1:Nexperiment) %dopar% {
+  paramTh0 = paramTh2 %>% dplyr::filter(ExpA==i)
+  handmod = Handmodel(p=paramTh0, l=lambda)
+  p = HandData(handmod, paramTh0, ICvalue)
+  data.frame(p,Experiment=i)
+}
+hand21 = do.call(rbind,hand2)
+
+#Data_Syn2
+hand3 = foreach (i=1:Nexperiment) %dopar% {
+  paramTh0 = paramTh3 %>% dplyr::filter(ExpA==i)
+  handmod = Handmodel(p=paramTh0, l=lambda)
+  p = HandData(handmod, paramTh0, ICvalue)
+  data.frame(p,Experiment=i)
+}
+hand31 = do.call(rbind,hand3)
+
+stopCluster(cl)
+```
+
+# Estimate IC50 of Rays
+```{r,echo=FALSE}
+Estdata_Add=EstimateValue(Data_Add, "doseA", "doseB", 
+                             Nexperiment=Nexperiment, Nray=5, ICvalue)
+Estdata_Syn1=EstimateValue(Data_Syn1, "doseA", "doseB", 
+                              Nexperiment=Nexperiment, Nray=5, ICvalue)
+Estdata_Syn2=EstimateValue(Data_Syn2, "doseA", "doseB", 
+                              Nexperiment=Nexperiment, Nray=5, ICvalue)
+lambda = c(0.5,1/3,2/3)
+Estfinal_Add = CalculateDose(Estdata_Add,lambda)
+Estfinal_Add$Ki = 1
+Estfinal_Syn1 = CalculateDose(Estdata_Syn1,lambda)
+Estfinal_Syn1$Ki = 0.5
+Estfinal_Syn2 = CalculateDose(Estdata_Syn2,lambda)
+Estfinal_Syn2$Ki = 0.8
+Estfinal = rbind(Estfinal_Add, Estfinal_Syn1, Estfinal_Syn2)
+Estfinal$Ki = as.factor(Estfinal$Ki)
+```
+
+```{r,echo=FALSE}
+#Plot theoretical parameters
+plottall = ggplot(tallarida) + geom_line(aes(doseA, doseB, group=convert))+
+  ggtitle("Tallarida model")
+plotloewe = ggplot(loewe) + geom_line(aes(doseA, doseB)) +
+  ggtitle("Loewe model")
+plothand = ggplot(handTh) + geom_line(aes(doseA,doseB)) +
+  geom_point(data=handP2, aes(doseA,doseB))+
+  ggtitle("Hand model")
+
+grid.arrange(plotloewe,plottall,plothand,ncol=3)
+```
+
+#Evaluate
+```{r,echo=FALSE}
+cl<-makeCluster(n.cl)
+clusterEvalQ(cl, {library(dplyr);library(ggplot2);library(SynergyEvaluation)})
+registerDoParallel(cl)
+
+#Data_Add
+Estfinal_Add$Ki = as.factor(Estfinal_Add$Ki)
+
+count1 = foreach (i=1:Nexperiment) %dopar% {
+  Est = Estfinal_Add %>% dplyr::filter(Experiment == i)
+  #additivity extraction
+  tl = tall11 %>% dplyr::filter((Experiment == i)&(convert =="B->A"))
+  th = tall11 %>% dplyr::filter((Experiment == i)&(convert =="A->B"))
+  l = loewe11 %>% dplyr::filter(Experiment == i)
+  h = hand11 %>% dplyr::filter(Experiment == i)
+  #count
+  finalcount = FinalAdditivity(Est, l, tl, th, h)
+  
+  data.frame(finalcount,Experiment=i)
+}
+count11 = do.call(rbind,count1)
+
+countf1 = group_by(count11, Ray, Model) %>% summarise(synergy = sum(Synergy)/Nexperiment,
+                                                   additive = sum(Additive/Nexperiment),
+                                                   antagonism = sum(Antagonism)/Nexperiment,
+                                                   uncertain = sum(Uncertain)/Nexperiment,
+                                                   N = Nexperiment)
+
+#Data_Syn1
+Estfinal_Syn1$Ki = as.factor(Estfinal_Syn1$Ki)
+
+count2 = foreach (i=1:Nexperiment) %dopar% {
+  Est = Estfinal_Syn1 %>% dplyr::filter(Experiment == i)
+  #additivity extraction
+  tl = tall21 %>% dplyr::filter((Experiment == i)&(convert =="B->A"))
+  th = tall21 %>% dplyr::filter((Experiment == i)&(convert =="A->B"))
+  l = loewe21 %>% dplyr::filter(Experiment == i)
+  h = hand21 %>% dplyr::filter(Experiment == i)
+  #count
+  finalcount = FinalAdditivity(Est, l, tl, th, h)
+  
+  data.frame(finalcount,Experiment=i)
+}
+count21 = do.call(rbind,count2)
+
+countf2 = group_by(count21, Ray, Model) %>% summarise(synergy = sum(Synergy)/Nexperiment,
+                                                   additive = sum(Additive/Nexperiment),
+                                                   antagonism = sum(Antagonism)/Nexperiment,
+                                                   uncertain = sum(Uncertain)/Nexperiment,
+                                                   N = Nexperiment)
+
+#Data_Syn2
+Estfinal_Syn2$Ki = as.factor(Estfinal_Syn2$Ki)
+
+count3 = foreach (i=1:Nexperiment) %dopar% {
+  Est = Estfinal_Syn2 %>% dplyr::filter(Experiment == i)
+  #additivity extraction
+  tl = tall31 %>% dplyr::filter((Experiment == i)&(convert =="B->A"))
+  th = tall31 %>% dplyr::filter((Experiment == i)&(convert =="A->B"))
+  l = loewe31 %>% dplyr::filter(Experiment == i)
+  h = hand31 %>% dplyr::filter(Experiment == i)
+  #count
+  finalcount = FinalAdditivity(Est, l, tl, th, h)
+  
+  data.frame(finalcount,Experiment=i)
+}
+count31 = do.call(rbind,count3)
+countf3 = group_by(count31, Ray, Model) %>% summarise(synergy = sum(Synergy)/Nexperiment,
+                                                   additive = sum(Additive/Nexperiment),
+                                                   antagonism = sum(Antagonism)/Nexperiment,
+                                                   uncertain = sum(Uncertain)/Nexperiment,
+                                                   N = Nexperiment)
+
+stopCluster(cl)
+```
+```{r}
+print(countf1)
+print(countf2)
+print(countf3)
+```
+#Evaluate significant - point
+```{r,echo=FALSE}
+EvaluateAdditivity_point<-function(Estfinal, Additivity, nameModel){
+  n = nrow(Estfinal)
+  final <- vector("list", n)
+  for(i in 1:n){
+    UA = Estfinal$doseA[i]+0.5
+    UB = Estfinal$doseB[i]+0.5
+    LA = Estfinal$doseA[i]-0.5
+    LB = Estfinal$doseB[i]-0.5
+    
+    EvalAdd = Additivity %>% filter((doseA<=UA)&(doseA>LA)&(doseB<=UB)&(doseB>LB))
+    N1 = nrow(EvalAdd)
+    
+    if(N1==0){
+      Evalsyn = Additivity %>% filter((doseA<UA)&(doseB<UB))
+      N2 = nrow(Evalsyn)
+      if(N2==0){
+        Nsynergy = 1
+        Nadditive = 0
+        Nantagonism = 0
+        Nuncertain = 0
+      }else{
+        Nsynergy = 0
+        Nadditive = 0
+        Nantagonism = 1
+        Nuncertain = 0
+      }
+    }else{
+      Nsynergy = 0
+      Nadditive = 1
+      Nantagonism = 0
+      Nuncertain = 0
+    }
+    countsynergy = data.frame(Synergy = Nsynergy, 
+                              Additive = Nadditive, 
+                              Antagonism = Nantagonism,
+                              Uncertain = Nuncertain,
+                              model = nameModel)
+    final[[i]] = cbind(countsynergy,Estfinal[i,])
+  }
+  final = do.call(rbind,final)
+  return(final)
+}
+EvaluateAdditivity_Tallarida_point<-function(Estfinal,BtoA, AtoB, nameModel){
+  n = nrow(Estfinal)
+  final <- vector("list", n)
+  for(i in 1:n){
+    UA = Estfinal$doseA[i]+0.5
+    UB = Estfinal$doseB[i]+0.5
+    LA = Estfinal$doseA[i]-0.5
+    LB = Estfinal$doseB[i]-0.5
+    
+    EvalAdd = BtoA %>% filter((doseA<UA)&(doseA>LA)&(doseB<UB)&(doseB>LB))
+    N1 = nrow(EvalAdd)
+    
+    if(N1==0){
+      EvalsynB = BtoA %>% filter((doseA<UA)&(doseB<UB))
+      EvalsynA = AtoB %>% filter((doseA<UA)&(doseB<UB))
+      Nb1 = nrow(EvalsynB)
+      Na1 = nrow(EvalsynA)
+      
+      EvalantA = AtoB %>% filter((doseA>LA)&(doseB>LB))
+      EvalantB = BtoA %>% filter((doseA>LA)&(doseB>LB))
+      Na2 = nrow(EvalantA)
+      Nb2 = nrow(EvalantB)
+      
+      if((Nb1==0)&&(Na1==0)){
+        Nsynergy = 1
+        Nadditive = 0
+        Nantagonism = 0
+        Nuncertain = 0
+      }else if((Nb2==0)&&(Na2==0)){
+        Nsynergy = 0
+        Nadditive = 0
+        Nantagonism = 1
+        Nuncertain = 0
+      }else{
+        Nsynergy = 0
+        Nadditive = 0
+        Nantagonism = 0
+        Nuncertain = 1
+      }
+    }else{
+      Nsynergy = 0
+      Nadditive = 0
+      Nantagonism = 0
+      Nuncertain = 1
+    }
+    countsynergy = data.frame(Synergy = Nsynergy, 
+                              Additive = Nadditive, 
+                              Antagonism = Nantagonism,
+                              Uncertain = Nuncertain,
+                              model = nameModel)
+    final[[i]] = cbind(countsynergy,Estfinal[i,])
+  }
+  final = do.call(rbind,final)
+  return(final)
+}
+CountAdditivity_point<-function(Estfinal, Additivity, nameModel){
+  raylist = levels(Estfinal$Ray)
+  Kilist = levels(Estfinal$Ki)
+  
+  Nray = length(raylist)
+  Nki = length(Kilist)
+  final <- vector("list", Nki)
+
+  for(j in 1:Nki){
+    ki = Kilist[j]
+    data1 = Estfinal %>% filter(Ki==ki)
+    result <- vector("list", Nray)
+    for(i in 1:Nray){
+      ray = raylist[i]
+      data2 = data1 %>% filter(Ray==ray)
+      data = EvaluateAdditivity_point(data2, Additivity, nameModel)
+      
+      n = nrow(data)
+      Nad = sum(data$Additive)
+      Nsy = sum(data$Synergy)
+      Nan = sum(data$Antagonism)
+      Nun = sum(data$Uncertain)
+      
+      result[[i]] = data.frame(N = n, 
+                               Model = nameModel,
+                               Synergy = Nsy,
+                               Additive = Nad,
+                               Antagonism = Nan,
+                               Uncertain = Nun,
+                               Ray = ray,
+                               Ki = ki) 
+      
+    }
+    result = do.call(rbind,result)
+    final[[j]] = result
+  }
+  final = do.call(rbind,final)
+  
+  return(final)
+}
+CountAdditivity_Tallarida_point<-function(Estfinal, BtoA, AtoB, nameModel){
+  raylist = levels(Estfinal$Ray)
+  Kilist = levels(Estfinal$Ki)
+  
+  Nray = length(raylist)
+  Nki = length(Kilist)
+  final <- vector("list", Nki)
+  
+  for(j in 1:Nki){
+    ki = Kilist[j]
+    data1 = Estfinal %>% filter(Ki==ki)
+    result <- vector("list", Nray)
+    for(i in 1:Nray){
+      ray = raylist[i]
+      data2 = data1 %>% filter(Ray==ray)
+      data = EvaluateAdditivity_Tallarida_point(data2, BtoA, AtoB, nameModel)
+       
+      n = nrow(data)
+      Nad = sum(data$Additive)
+      Nsy = sum(data$Synergy)
+      Nan = sum(data$Antagonism)
+      Nun = sum(data$Uncertain)
+      
+      result[[i]] = data.frame(N = n, 
+                               Model = nameModel,
+                               Synergy = Nsy,
+                               Additive = Nad,
+                               Antagonism = Nan,
+                               Uncertain = Nun,
+                               Ray = ray,
+                               Ki = ki) 
+      
+    }
+    result = do.call(rbind,result)
+    final[[j]] = result
+  }
+  final = do.call(rbind,final)
+  
+  return(final)
+}
+FinalAdditivity_point<-function(Estfinal, Loewe, TallaridaBtoA, TallaridaAtoB, Hand){
+  l = CountAdditivity_point(Estfinal, Loewe, "Loewe")
+  t1 = CountAdditivity_point(Estfinal, TallaridaBtoA, "Tallarida(B->A)")
+  t2 = CountAdditivity_point(Estfinal, TallaridaAtoB, "Tallarida(A->B)")
+  h = CountAdditivity_point(Estfinal, Hand, "Hand")
+  #hs = CountAdditivity(Estfinal, HSA, "HSA")
+  ttotal = CountAdditivity_Tallarida_point(Estfinal, TallaridaBtoA, TallaridaAtoB, "Tallarida")
+  
+  final = rbind(l, h, ttotal, t1, t2)
+  return(final)
+}
+```
+```{r,echo=FALSE}
+cl<-makeCluster(n.cl)
+clusterEvalQ(cl, {library(dplyr);library(ggplot2);library(SynergyEvaluation)})
+registerDoParallel(cl)
+
+#Data_Add
+count1p = vector("list", Nexperiment) 
+count1p = foreach (i=1:Nexperiment) %dopar% {
+  Est = Estfinal_Add %>% dplyr::filter(Experiment == i)
+  #additivity extraction
+  tl = tall11 %>% dplyr::filter((Experiment == i)&(convert =="B->A"))
+  th = tall11 %>% dplyr::filter((Experiment == i)&(convert =="A->B"))
+  l = loewe11 %>% dplyr::filter(Experiment == i)
+  h = hand11 %>% dplyr::filter(Experiment == i)
+  #count
+  finalcount = FinalAdditivity_point(Est, l, tl, th, h)
+  
+  data.frame(finalcount,Experiment=i)
+}
+
+count11p = do.call(rbind,count1p)
+countf1p = group_by(count11p, Ray, Model) %>% summarise(synergy = sum(Synergy)/Nexperiment,
+                                                   additive = sum(Additive/Nexperiment),
+                                                   antagonism = sum(Antagonism)/Nexperiment,
+                                                   uncertain = sum(Uncertain)/Nexperiment,
+                                                   N = Nexperiment)
+#Data_Syn1
+count2p = foreach (i=1:Nexperiment) %dopar% {
+  Est = Estfinal_Syn1 %>% dplyr::filter(Experiment == i)
+  #additivity extraction
+  tl = tall21 %>% dplyr::filter((Experiment == i)&(convert =="B->A"))
+  th = tall21 %>% dplyr::filter((Experiment == i)&(convert =="A->B"))
+  l = loewe21 %>% dplyr::filter(Experiment == i)
+  h = hand21 %>% dplyr::filter(Experiment == i)
+  #count
+  finalcount = FinalAdditivity_point(Est, l, tl, th, h)
+  
+  data.frame(finalcount,Experiment=i)
+}
+count21p = do.call(rbind,count2p)
+countf2p = group_by(count21p, Ray, Model) %>% summarise(synergy = sum(Synergy)/Nexperiment,
+                                                   additive = sum(Additive/Nexperiment),
+                                                   antagonism = sum(Antagonism)/Nexperiment,
+                                                   uncertain = sum(Uncertain)/Nexperiment,
+                                                   N = Nexperiment)
+
+#Data_Syn2
+count3p = foreach (i=1:Nexperiment) %dopar% {
+  Est = Estfinal_Syn2 %>% dplyr::filter(Experiment == i)
+  #additivity extraction
+  tl = tall31 %>% dplyr::filter((Experiment == i)&(convert =="B->A"))
+  th = tall31 %>% dplyr::filter((Experiment == i)&(convert =="A->B"))
+  l = loewe31 %>% dplyr::filter(Experiment == i)
+  h = hand31 %>% dplyr::filter(Experiment == i)
+  #count
+  finalcount = FinalAdditivity_point(Est, l, tl, th, h)
+  
+  data.frame(finalcount,Experiment=i)
+}
+count31p = do.call(rbind,count3p)
+countf3p = group_by(count31p, Ray, Model) %>% summarise(synergy = sum(Synergy)/Nexperiment,
+                                                   additive = sum(Additive/Nexperiment),
+                                                   antagonism = sum(Antagonism)/Nexperiment,
+                                                   uncertain = sum(Uncertain)/Nexperiment,
+                                                   N = Nexperiment)
+
+stopCluster(cl)
+```
+```{r}
+print(countf1p)
+print(countf2p)
+print(countf3p)
+```
+

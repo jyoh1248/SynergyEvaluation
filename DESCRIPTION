@@ -1,0 +1,20 @@
+Package: SynergyEvaluation
+Title: Methods for explicit detection of synergy (One Line, Title Case)
+Version: 1.0.5.2020
+Authors@R: 
+    person(given = "Jiyoung",
+           family = "OH",
+           role = c("aut", "cre"),
+           email = "jyoh1248@gmail.com",
+           comment = c(ORCID = "YOUR-ORCID-ID"))
+Description: What the package does (one paragraph).
+License: `use_mit_license()`, `use_gpl3_license()` or friends to pick a
+        license
+Encoding: UTF-8
+LazyData: true
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.1.1
+NeedsCompilation: no
+Packaged: 2020-11-10 14:18:02 UTC; jiyoung OH
+Author: Jiyoung OH [aut, cre] (YOUR-ORCID-ID)
+Maintainer: Jiyoung OH <jyoh1248@gmail.com>
