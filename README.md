@@ -30,8 +30,13 @@ Explanation of important notations
 ![notion](/source/notion0.png)
 ![notion](/source/notion.png)
 
-### Models used
-![alternative](/source/model1.png)
+### Model (1) : Loewe model
+![loewe1](/source/loewe1.png)
+![loewe2](/source/loewe2.png)
+
+### Model (2) : Tallarida model
+
+### Model (3) : Hand model
 
 
 ## Authors
