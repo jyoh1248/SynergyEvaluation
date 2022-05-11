@@ -21,7 +21,7 @@ With the aim to develop better treatment regimens with increased efficacy and/or
 ### Interaction effects evaluation for in vitro combinations of two compouds : comparision of methods in variable relative potency cases (two compouns with nonparallel dose-effect curves)
 
 
-> The internship's mission includes the overview of the current statistical methods to analyze compounds combinations with in-vitro experiments in the case where the relative potency is not constant (maximum effects and/or slopes not shared between the dose-effect curves of single compounds). The methods for explicit detection of synergy will be discussed as well as the proposition of alternative methods like Tallarida model and Hand model. The implementation of methods, including development of a R package called \texttt{SynergyEvaluation}, is conducted with simulations of experimental data. Finally results are presented visually, in order to facilitate the understanding and the comparison between methods.
+> The internship's mission includes the overview of the current statistical methods to analyze compounds combinations with in-vitro experiments in the case where the relative potency is not constant (maximum effects and/or slopes not shared between the dose-effect curves of single compounds). The methods for explicit detection of synergy will be discussed as well as the proposition of alternative methods like Tallarida model and Hand model. The implementation of methods, including development of a R package called **SynergyEvaluation**, is conducted with simulations of experimental data. Finally results are presented visually, in order to facilitate the understanding and the comparison between methods.
 
 ![simulation](/source/simulation.png)
 
