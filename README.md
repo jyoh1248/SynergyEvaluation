@@ -76,7 +76,7 @@ The following section is the part of my work where I presented on November 5th i
 
 ## Authors
   - [OH](https://github.com/jyoh1248) - **Jiyoung OH** - <jyoh1248@gmail.com>
-  - [WINDENBERGER] **Fanny WINDENBERGER** <Fanny.Windenberger@sanofi.com>
+  - **Fanny WINDENBERGER** <Fanny.Windenberger@sanofi.com>
 
 ## Reference    
 ![reference](/source/reference.png)
