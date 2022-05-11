@@ -4,7 +4,7 @@ Interaction effects evaluation for in vitro combinations of two compounds, R pac
 ## Index
   - [Overview](#Overview) 
   - [Description](#Description) 
-  - [Usage of package](#Usage)
+  - [Structure of package](#Structure)
   - [Authors](#Authors)
   - [Reference](#Reference)
 
@@ -27,8 +27,7 @@ With the aim to develop better treatment regimens with increased efficacy and/or
 ![simulation](/source/simulation.png)
 
 
-## Usage
-
+## Structure
 ```
 ├── DESCRIPTION
 ├── packagefile
