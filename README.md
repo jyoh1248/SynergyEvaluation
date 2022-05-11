@@ -44,6 +44,13 @@ Explanation of important notations
 ### Model (3) : Hand model
 
 
+![hand1](/source/hand1.png)
+![hand2](/source/hand2.png)
+![hand3](/source/hand3.png)
+![hand4](/source/hand4.png)
+![hand5](/source/hand5.png)
+
+
 ## Authors
   - [OH](https://github.com/jyoh1248) - **Jiyoung OH** - <jyoh1248@gmail.com>
   
