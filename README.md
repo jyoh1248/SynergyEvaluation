@@ -24,6 +24,12 @@ The internship's mission includes the overview of the current statistical method
 
 ![simulation](/source/simulation.png)
 
+### Notions
+![notion](/source/notion.png)
+
+### Models used
+![alternative](/source/model1.png)
+
 
 ## Authors
   - [OH](https://github.com/jyoh1248) - **Jiyoung OH** - <jyoh1248@gmail.com>
