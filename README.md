@@ -55,18 +55,15 @@ Explanation of important notations
   - [OH](https://github.com/jyoh1248) - **Jiyoung OH** - <jyoh1248@gmail.com>
 
 ## Reference    
-- Berenbaum, M. C. What is synergy? \textit{Pharmacological reviews} 41,(1989).
+- Berenbaum, M. C. What is synergy? *Pharmacological reviews* 41,(1989).
     
 - Christian T., David J., et al., Quantifying Drug Combination Synergy along Potency and Efficacy Axes,\textit{Cell Systems}, 8, 2 (2019).
 
 - de Souza GE., Bueno RV., de Souza JO. et al. Antiplasmodial profile of selected compounds from Malaria Box: in vitro evaluation, speed of action and drug combination studies, \textit{Malaria Journal} 18, 447 (2019).
     
-- Foucquier J., Guedji M., Analysis of drug combinations: current methodological landscape,
-     \textit{Pharmacology Research \& Perspectives}, (2015).
+- Foucquier J., Guedji M., Analysis of drug combinations: current methodological landscape,\textit{Pharmacology Research \& Perspectives}, (2015).
      
-     \bibitem{Nori} 
-     Geary N. Understanding synergy. American journal of physiology,
-     \textit{Endocrinology and metabolism}, 304(3), E237–E253 (2013).
+- Geary N. Understanding synergy. American journal of physiology, \textit{Endocrinology and metabolism}, 304(3), E237–E253 (2013).
      
     \bibitem{Grab} 
      Grabovsky Y., Tallarida RJ., Isobolographic analysis for combinations of a full and partial agonist: Curved isoboles, \textit{The journal of pharmacology and experimental therapeutics} 310, 981–986 (2004).
