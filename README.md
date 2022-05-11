@@ -5,8 +5,7 @@ Interaction effects evaluation for in vitro combinations of two compounds, R pac
   - [Overview](#Overview) 
   - [Description](#Description) 
   - [Authors](#Authors)
-  - [Notations](#Notations)
-  - [Model1](#Model(1))
+  - [Reference](#Reference)
 
 ## Overview
 - Project name : Interacction effects evaluation (Sanofi)
@@ -19,7 +18,7 @@ With the aim to develop better treatment regimens with increased efficacy and/or
 
 ## Description
 
-### Interaction effects evaluation for in vitro combinations of two compouds : comparision of methods in variable relative potency cases (two compouns with nonparallel dose-effect curves)
+> Interaction effects evaluation for in vitro combinations of two compouds : comparision of methods in variable relative potency cases (two compouns with nonparallel dose-effect curves)
 
 
 The internship's mission includes the overview of the current statistical methods to analyze compounds combinations with in-vitro experiments in the case where the relative potency is not constant (maximum effects and/or slopes not shared between the dose-effect curves of single compounds). The methods for explicit detection of synergy will be discussed as well as the proposition of alternative methods like Tallarida model and Hand model. The implementation of methods, including development of a R package called \texttt{SynergyEvaluation}, is conducted with simulations of experimental data. Finally results are presented visually, in order to facilitate the understanding and the comparison between methods.
@@ -58,25 +57,22 @@ Explanation of important notations
 
 ## Reference    
 - Berenbaum, M. C. What is synergy? *Pharmacological reviews* 41,(1989).
+
 - Christian T., David J., et al., Quantifying Drug Combination Synergy along Potency and Efficacy Axes,*Cell Systems*, 8, 2 (2019).
+
 - de Souza GE., Bueno RV., de Souza JO. et al. Antiplasmodial profile of selected compounds from Malaria Box: in vitro evaluation, speed of action and drug combination studies, *Malaria Journal* 18, 447 (2019).
     
 - Foucquier J., Guedji M., Analysis of drug combinations: current methodological landscape,*Pharmacology Research & Perspectives*, (2015).
      
 - Geary N. Understanding synergy. American journal of physiology, *Endocrinology and metabolism*, 304(3), E237–E253 (2013).
-     
-    \bibitem{Grab} 
-     Grabovsky Y., Tallarida RJ., Isobolographic analysis for combinations of a full and partial agonist: Curved isoboles, \textit{The journal of pharmacology and experimental therapeutics} 310, 981–986 (2004).
+
+- Grabovsky Y., Tallarida RJ., Isobolographic analysis for combinations of a full and partial agonist: Curved isoboles, *The journal of pharmacology and experimental therapeutics* 310, 981–986 (2004).
     
-    \bibitem{Greco} 
-    Greco WR., Bravo G., Parsons JC., The search for synergy: A critical review from a response surface perspective. \textit{Pharmacological reviews} 47, 331–385 (1995).
+- Greco WR., Bravo G., Parsons JC., The search for synergy: A critical review from a response surface perspective. *Pharmacological reviews* 47, 331–385 (1995).
     
-     \bibitem{BIGL}
-     Habron C., A flexible unified approach to the analysis of pre-clinical combination studies,
-     \textit{Statistics in Medicine}, (2020).
+- Habron C., A flexible unified approach to the analysis of pre-clinical combination studies,*Statistics in Medicine*, (2020).
      
-     \bibitem{isobole2}
-     Huang RY., Pei L., et al., Isobologram Analysis: A Comprehensive Review of Methodology and Current Research,
+- Huang RY., Pei L., et al., Isobologram Analysis: A Comprehensive Review of Methodology and Current Research,
      \textit{Frontiers in pharmacology}, 10, 1222 (2019). 
      
      \bibitem{gen.response}
