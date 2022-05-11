@@ -6,7 +6,7 @@ Interaction effects evaluation for in vitro combinations of two compounds, R pac
   - [Description](#Description) 
   - [Authors](#Authors)
   - [Notations](#Notations)
-  - [Model1](#Model (1) : Loewe model)
+  - [Model1](#Model(1))
 
 ## Overview
 - Project name : Interacction effects evaluation (Sanofi)
@@ -32,7 +32,7 @@ Explanation of important notations
 ![notion](/source/notion0.png)
 ![notion](/source/notion.png)
 
-### Model (1) : Loewe model
+### Model(1) : Loewe model
 
 ![loewe1](/source/loewe1.png)
 ![loewe2](/source/loewe2.png)
