@@ -4,7 +4,7 @@ Interaction effects evaluation for in vitro combinations of two compounds, R pac
 ## Index
   - [Overview](#Overview) 
   - [Description](#Description) 
-  - [Explanation](#Detail)
+  - [Usage of package](#Usage)
   - [Authors](#Authors)
   - [Reference](#Reference)
 
@@ -26,6 +26,26 @@ With the aim to develop better treatment regimens with increased efficacy and/or
 
 ![simulation](/source/simulation.png)
 
+
+## Usage
+
+```
+├── DESCRIPTION
+├── packagefile
+│   ├── drc2_0.1.0.tar.gz
+│   └── SynergyEvaluation_1.0.5.2020.tar.gz
+├── package.R
+├── R
+│   ├── DoseeffectFct.R
+│   ├── EstimationFct.R
+│   ├── EvaluationFct.R
+│   ├── HandmodelFct.R
+│   ├── LoeweFct.R
+│   ├── SimulationFct.R
+│   └── TallaridaFct.R
+├── README.md
+├── SimulationCode.Rmd
+```
 
 ## Detail
 
