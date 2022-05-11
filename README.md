@@ -25,6 +25,8 @@ The internship's mission includes the overview of the current statistical method
 ![simulation](/source/simulation.png)
 
 ### Notions
+
+![notion](/source/notion0.png)
 ![notion](/source/notion.png)
 
 ### Models used
