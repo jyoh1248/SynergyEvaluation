@@ -4,6 +4,7 @@ Interaction effects evaluation for in vitro combinations of two compounds, R pac
 ## Index
   - [Overview](#Overview) 
   - [Description](#Description) 
+  - [Explanation](#Detail)
   - [Authors](#Authors)
   - [Reference](#Reference)
 
@@ -26,9 +27,8 @@ With the aim to develop better treatment regimens with increased efficacy and/or
 ![simulation](/source/simulation.png)
 
 
-### Notations
+## Detail
 
-Explanation of important notations
 ![notion](/source/notion0.png)
 ![notion](/source/notion.png)
 
