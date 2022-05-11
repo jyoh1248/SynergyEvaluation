@@ -9,8 +9,8 @@ Interaction effects evaluation for in vitro combinations of two compounds, R pac
   - [Reference](#Reference)
 
 ## Overview
-- Project name : Interacction effects evaluation (Sanofi)
-- Project period : 2020/04 - 2020/11 ((Sanofi))
+- Project name : Interacction effects evaluation
+- Project period : 2020/04 - 2020/11 (Sanofi)
 - Package updated : 2020/11, SynergyEvaluation_1.0.5.2020.tar.gz
 
 
