@@ -46,6 +46,11 @@ With the aim to develop better treatment regimens with increased efficacy and/or
 ├── SimulationCode.Rmd
 ```
 
+## Install
+``` r
+devtools::install_github("jyoh1248/SynergyEvaluation")
+```
+
 ## Detail
 
 The following section is the part of my work where I presented on November 5th in NCES seminar, Sanofi and on November 25th, 2020 in ENSAI. 
